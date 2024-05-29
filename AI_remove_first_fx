@@ -1,0 +1,13 @@
+-- Function to remove the first FX on a track
+function remove_first_fx(track)
+  local fx_count = reaper.TrackFX_GetCount(track)
+  if fx_count > 0 then
+    reaper.TrackFX_Delete(track, 0)
+  end
+end
+
+-- Get the selected track
+track = reaper.GetSelectedTrack(0, 0)
+if track then
+  remove_first_fx(track)
+end
