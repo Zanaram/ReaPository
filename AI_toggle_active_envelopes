@@ -1,0 +1,26 @@
+-- Function to toggle the active state of all envelopes on a track
+function toggle_envelopes_active_state(track)
+  local envelope_count = reaper.CountTrackEnvelopes(track)
+  
+  for i = 0, envelope_count - 1 do
+    local envelope = reaper.GetTrackEnvelope(track, i)
+    local retval, chunk = reaper.GetEnvelopeStateChunk(envelope, "", false)
+    
+    if retval then
+      -- Toggle the active state
+      if chunk:find("ACT 0") then
+        chunk = chunk:gsub("ACT 0", "ACT 1")
+      elseif chunk:find("ACT 1") then
+        chunk = chunk:gsub("ACT 1", "ACT 0")
+      end
+      
+      reaper.SetEnvelopeStateChunk(envelope, chunk, false)
+    end
+  end
+end
+
+-- Main execution
+track = reaper.GetSelectedTrack(0, 0)
+if track then
+  toggle_envelopes_active_state(track)
+end
