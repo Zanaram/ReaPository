@@ -1,0 +1,50 @@
+-- Function to bypass all FX on a track except for the first one
+function bypass_all_fx_except_first(track)
+  local fx_count = reaper.TrackFX_GetCount(track)
+  for i = 1, fx_count - 1 do
+    reaper.TrackFX_SetEnabled(track, i, false) -- Bypass the FX
+  end
+end
+
+-- Function to prompt a confirmation dialog before proceeding
+function prompt_confirmation()
+  local confirmation = reaper.ShowMessageBox("Do you want to continue with applying FX? (Confirm all plugins are bypassed except Melodyne)", "Confirmation", 3)
+  return confirmation == 6 -- Return true if "OK" is pressed, false otherwise
+end
+
+-- Function to apply track/take FX to items as new take (mono output)
+function apply_fx_to_items(track)
+  reaper.Main_OnCommand(40209, 0) -- Apply track/take FX to items as new take (mono output)
+end
+
+-- Function to remove the first FX from the track
+function remove_first_fx(track)
+  reaper.TrackFX_Delete(track, 0) -- Delete the first FX
+end
+
+-- Function to toggle the bypass state of all FX on a track
+function toggle_fx_bypass(track, bypass_state)
+  local fx_count = reaper.TrackFX_GetCount(track)
+  for i = 0, fx_count - 1 do
+    reaper.TrackFX_SetEnabled(track, i, bypass_state)
+  end
+end
+
+-- Get the selected track
+track = reaper.GetSelectedTrack(0, 0)
+if track then
+  -- Step 1: Bypass all plugins except for the first one
+  bypass_all_fx_except_first(track)
+  
+  -- Step 2: Prompt confirmation
+  if prompt_confirmation() then
+    -- Step 3: Apply track/take FX to items
+    apply_fx_to_items(track)
+    
+    -- Step 4: Remove the first FX from the track
+    remove_first_fx(track)
+    
+    -- Step 5: Toggle the bypass state of all FX back on
+    toggle_fx_bypass(track, true)
+  end
+end
