@@ -1,0 +1,25 @@
+-- Function to bypass all FX on a track except for the first one
+function bypass_all_fx_except_first(track)
+  local fx_count = reaper.TrackFX_GetCount(track)
+  for i = 1, fx_count - 1 do  -- Start from 1 to bypass all except the first one (index 0)
+    reaper.TrackFX_SetEnabled(track, i, false) -- Bypass the FX
+    -- Ensure any active automation envelopes are also bypassed
+    local envelope_count = reaper.CountTrackEnvelopes(track)
+    for j = 0, envelope_count - 1 do
+      local envelope = reaper.GetTrackEnvelope(track, j)
+      local retval, env_name = reaper.GetEnvelopeName(envelope, "")
+      if retval then
+        local fx_name = reaper.TrackFX_GetFXName(track, i, "")
+        if fx_name == env_name then
+          reaper.SetEnvelopeStateChunk(envelope, '<AIState\nISBYPASSED 1\n>', false)
+        end
+      end
+    end
+  end
+end
+
+-- Get the selected track
+track = reaper.GetSelectedTrack(0, 0)
+if track then
+  bypass_all_fx_except_first(track)
+end
